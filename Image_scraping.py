@@ -1,42 +1,35 @@
 from selenium import webdriver
-from bs4 import BeautifulSoup as soups
+from bs4 import BeautifulSoup as BS
+from urllib.request import urlretrieve #다운로드
+from urllib.parse import quote_plus
 
-def search_selenium(search_name, search_path, search_limit) :
-    search_url = "https://www.google.com/search?q=" + str(search_name) + "&hl=ko&tbm=isch" # 구글 이미지창 주소 
+def img_scraping(keyword, count):
+    url = "https://www.google.com/search?q=" + str(keyword) + "&hl=ko&tbm=isch" # 구글 이미지창 주소
     
-    browser = webdriver.Chrome() 
-    browser.get(search_url) # 이미지 창 띄우기
+    browser=webdriver.Chrome()
+    browser.get(url)
+
+    html = browser.page_source
+    soup = BS(html,features="html.parser")
+
+    img = soup.select('div.bRMDJf > img') # Class = bRMDJF 가 들어있는 div 하위에 img 지정
+
+    img_list =[]
+    cnt = 1
+
+    for i in img:
+        try:
+            img_list.append(i.attrs["src"])
+        except KeyError:
+            img_list.append(i.attrs["data-src"])
     
-    # image_count = len(browser.find_elements_by_tag_name("img")) # 
-    
-    # print("로드된 이미지 개수 : ", image_count)
-
-    browser.implicitly_wait(2)
-
-    images = browser.find_elements_by_class_name("rg_i")
-    cnt = 0
-
-    for image in images:
-        image.get_attribute("img")
-        image.screenshot("C:\\Users\\user\\Desktop\\이재용\\" + str(cnt) + ".jpg")
+    for i in img_list:
+        urlretrieve(i,"C:\\Users\\user\\Desktop\\"+keyword+"\\"+keyword+str(cnt)+".jpg")
         cnt += 1
-        if cnt == search_limit:
+        if cnt == count:
             break
-    print("저장한 이미지 수 : " , cnt)
     browser.close()
+    print(str(cnt)+"개 다운로드")
 
-    # for i in range( search_limit ) :
-    #     for image in images:
-    #         image.get_attribute("img")
-    #     # image = browser.find_elements_by_tag_name("img")[i]
-    #         image.screenshot("C:\\Users\\user\\Desktop\\이재용\\" + str(i) + ".jpg")
-    #     # # search_path = image.screenshot("./Mr_Moon/" + str(i) + ".png")
-    #         browser.close()
+img_scraping(input("이름 : "),int(input("장수 : ")))
 
-if __name__ == "__main__" :
-
-    search_name = input("검색하고 싶은 키워드 : ")
-    search_limit = int(input("원하는 이미지 수집 개수 : "))
-    search_path = "C:\\Users\\user\\Desktop\\이재용"
-    # search_maybe(search_name, search_limit, search_path)
-    search_selenium(search_name, search_path, search_limit)
