@@ -2,6 +2,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup as BS
 from urllib.request import urlretrieve #다운로드
 from urllib.parse import quote_plus
+import os
 
 def img_scraping(keyword, count):
     url = "https://www.google.com/search?q=" + str(keyword) + "&hl=ko&tbm=isch" # 구글 이미지창 주소
@@ -24,12 +25,18 @@ def img_scraping(keyword, count):
             img_list.append(i.attrs["data-src"])
     
     for i in img_list:
-        urlretrieve(i,"C:\\Users\\user\\Desktop\\"+keyword+"\\"+keyword+str(cnt)+".jpg")
+        try:
+            if not os.path.exists("C:\\Users\\user\\Desktop\\image\\"+keyword): # Keyword 폴더가 존재하지 않는다면
+                os.makedirs("C:\\Users\\user\\Desktop\\image\\"+keyword)  # 폴더 생성
+        except:
+            continue
+        urlretrieve(i,"C:\\Users\\user\\Desktop\\image\\"+keyword+"\\"+keyword+str(cnt)+".jpg")
         cnt += 1
-        if cnt == count:
+        if cnt == (count+1):
             break
     browser.close()
-    print(str(cnt)+"개 다운로드")
+    os.startfile("C:\\Users\\user\\Desktop\\image\\"+keyword) #폴더 열기
+    print(str(count)+"개 다운로드")
 
 img_scraping(input("이름 : "),int(input("장수 : ")))
 
